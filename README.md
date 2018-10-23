@@ -106,3 +106,87 @@ If you run it again what happens?
 You should see in the output that the file is "ok".
 
 Note that the very first time ssh is used to connect to a machine it will ask if you want to add the host key to the list of known hosts (standard ssh behaviour). You can either ssh manually into web1, web2 and web3 first - or just say yes three times when running the playbook the first time.
+
+## Workshop 1
+
+The motd recipe installs the same message on all machines. That's OK - but it would be nice to have the hostname in the text of the message so that we know what server we are connecting to.
+
+To do this - we need to move from a static file to a generated one.
+
+To do this - ansible uses the jinja2 templating language.
+
+### Task
+
+* Create a templates directory under roles/motd
+* Create a motd.j2 file in templates
+* Create the contents of the file using jinja2
+    *  you can add any fact as text by wrapping it in {{ }} - 
+    *  can you find a fact that allows you to have the motd "Welcome to &lt;hostname&gt;" ?
+* Change the tasks file to create the motd from template:
+    * templates use the template moduletask instead of copy
+* Tidy up by removing the files/motd file
+
+## Workshop 2
+
+Linux servers have a system entropy that is used in random number generation. This gets data from keyboard and mouse events, a very little from network activity etc. On modern servers - entropy can be a little low - which will cause performance problems in anything requiring random numbers (ssh, ssl etc).
+
+There is a method called [HAVEGE](http://www.irisa.fr/caps/projects/hipsor/) for adding additional entropy and there is a linux package for that called haveged.
+
+Let's install that package
+
+First - let's check the current entropy on the system - ssh into one of the web boxes and then run
+
+    cat /proc/sys/kernel/random/entropy_avail
+
+If it's under 2000 or so - then the system needs more entropy.
+
+### Task
+
+* Create a new role called haveged
+* Create the tasks folder and main.yml files for that role
+* Create the package installer task in main.yml to install epel-release
+    * Use the yum module
+* Create the package installer task in main.yml to install haveged
+    * Use the yum module
+* Create a playbook for haveged in the playbooks directory
+    * Set it up so that it runs the haveged role for servers in the web group
+* Run the playbook
+
+This should install haveged on web1 only. SSH into web1 and check the entropy level. It is still too low. If you check you will find that haveged isn't actually running.
+
+To handle starting and stopping services we need to discuss handlers.
+
+## Handlers
+
+Handlers are how you can stop, start, restart services.
+
+Since it is possible that several things can need to cause a restart, each recipe can "notify" a handler, and then at the end - any handler with at least one notification will trigger.
+
+Let's add a handler to the haveged role
+
+* create the directory roles/haveged/handlers
+* create the file roles/haveged/handlers/main.yml
+
+```
+- name: haveged | start
+  service:
+    name: haveged
+    state: started
+```
+
+* add the notification to the tasks/main.yml haveged task
+
+```
+  notify:
+    - haveged | start
+```
+
+Run the haveged playbook again - it should give you OK messages for the two tasks. Since nothing changed - it doesn't start haveged.
+
+Let's include web2 in the mix - in the inventory file - add web2 to the web list and then run the haveged playbook once more.
+
+This should show OK for things on web1, changed for things on web2 and should also trigger the handler for starting haveged on web2.
+
+Check the entropy on web1 and web2 - it should be a lot higher on web2 (somewhere close to 2500).
+
+
