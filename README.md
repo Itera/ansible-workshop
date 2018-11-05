@@ -8,13 +8,13 @@ See [prerequisites.md](prerequisites.md).
 
 We are going to use vagrant to give everyone the same environment.
 
-We will set up 4 machines, one working machine where we will run ansible and three machines that we want to provision.
+We will set up 5 machines, one working machine where we will run ansible and four machines that we want to provision.
 
 You could choose to use the ansible code towards multiple instances in a cloud solution etc - there is nothing vagrant specific about them - but for the workshop this just makes sure that everyone is on the same page.
 
 ### Vagrant initialization
 
-First let's do the initial startup - this could take a few minites - it is creating 4 machines.
+First let's do the initial startup - this could take a few minutes - it is creating 4 machines.
 
 ```
 vagrant up
@@ -22,7 +22,7 @@ vagrant up
 
 This does several things:
 
-* Creates 4 Centos 7 machines
+* Creates 5 Centos 7 machines
 * Sets up that root can use ssh to connect
 * Sets up the ssh keys for root (the same on all machines)
 * Sets up the local hosts files for each machine so that we can use hostnames
@@ -36,7 +36,7 @@ Note that the ssh keys used here were generated for this workshop and should onl
 The four machines that are set up are:
 
 * ansible - the VM you will use to run ansible
-* web1, web2, web3 - three machines that we want to use as webservers.
+* web1, web2, web3, web4 - three machines that we want to use as webservers.
 
 ## Login to the workspace
 
@@ -45,6 +45,7 @@ We need to login to the ansible machine where we will run the exercises.
 ```
 vagrant ssh ansible
 sudo su -
+cd ansible
 ```
 
 All steps after this assume that you are logged in to this workspace.
@@ -57,7 +58,7 @@ Here we setup some default stuff - paths etc.
 
 ### inventory/hosts
 
-Start with the inventory/hosts file - this is where we tell ansible what machines are in which groups. Initially - all three are marked as servers but only one is in web. We will add the others here later on.
+Start with the inventory/hosts file - this is where we tell ansible what machines are in which groups. Initially - only web1 and web3 are marked as `server` and only web1 as `web`. We will change this later on.
 
 ## Facts
 
@@ -86,15 +87,15 @@ So - we have a sample role that will set the message of the day file to a simple
 
 Then we setup a playbook - which tells ansible what roles to run for which servers.
 
-* playbooks/demo1.yml - says to run the motd role for all machines in the server group
+* playbooks/motd.yml - says to run the motd role for all machines in the server group
 
 Let's run it:
 
 ```
-ansible-playbook playbooks/demo1.yml
+ansible-playbook playbooks/motd.yml
 ```
 
-It should install the motd file on all three web machines.
+It should install the motd file on web1 and web3.
 
 You should see in the output that the file is "changed".
 
@@ -102,7 +103,7 @@ If you run it again what happens?
 
 You should see in the output that the file is "ok".
 
-Note that the very first time ssh is used to connect to a machine it will ask if you want to add the host key to the list of known hosts (standard ssh behaviour). You can either ssh manually into web1, web2 and web3 first - or just say yes three times when running the playbook the first time.
+*Note that the very first time ssh is used to connect to a machine it will ask if you want to add the host key to the list of known hosts (standard ssh behaviour). You can either ssh manually into web1, web2 and web3 first - or just say yes three times when running the playbook the first time.*
 
 ## Workshop 1
 
@@ -110,18 +111,20 @@ The motd recipe installs the same message on all machines. That's OK - but it wo
 
 To do this - we need to move from a static file to a generated one.
 
-To do this - ansible uses the jinja2 templating language.
+For templates like this ansible uses the jinja2 templating language.
 
 ### Task
 
 * Create a templates directory under roles/motd
 * Create a motd.j2 file in templates
 * Create the contents of the file using jinja2
-    *  you can add any fact as text by wrapping it in {{ }} - 
+    *  you can add any fact as text by wrapping it in {{ }}
     *  can you find a fact that allows you to have the motd "Welcome to &lt;hostname&gt;" ?
 * Change the tasks file to create the motd from template:
-    * templates use the template moduletask instead of copy
+    * templates use the template module instead of the copy module
 * Tidy up by removing the files/motd file
+
+Re-run the playbook and then check that the motd is changed on web1 and web3.
 
 ## Workshop 2
 
@@ -146,10 +149,10 @@ If it's under 2000 or so - then the system needs more entropy.
 * Create the package installer task in main.yml to install haveged
     * Use the yum module
 * Create a playbook for haveged in the playbooks directory
-    * Set it up so that it runs the haveged role for servers in the web group
+    * Set it up so that it runs the haveged role for servers in the `server` group
 * Run the playbook
 
-This should install haveged on web1 only. SSH into web1 and check the entropy level. It is still too low. If you check you will find that haveged isn't actually running.
+This should install haveged on web1 and web3 only. SSH into web1 or web3 and check the entropy level. It is still too low. If you check you will find that haveged isn't actually running.
 
 To handle starting and stopping services we need to discuss handlers.
 
@@ -180,19 +183,21 @@ Let's add a handler to the haveged role
 
 Run the haveged playbook again - it should give you OK messages for the two tasks. Since nothing changed - it doesn't start haveged.
 
-Let's include web2 in the mix - in the inventory file - add web2 to the web list and then run the haveged playbook once more.
+Let's include web2 in the mix - in the inventory file - add web2 to the `server` list and then run the haveged playbook once more.
 
-This should show OK for things on web1, changed for things on web2 and should also trigger the handler for starting haveged on web2.
+This should show OK for things on web1 and web3, changed for things on web2 and should also trigger the handler for starting haveged on web2.
 
-Check the entropy on web1 and web2 - it should be a lot higher on web2 (somewhere close to 2500).
+Check the entropy on web1/web3 vs. web2 - it should be a lot higher on web2 (somewhere close to 2500).
+
+Handlers can be used for most normal state changes - start, stop, restart. It is fairly common to use the installation of a package to trigger a start handler and anything that changes configuration to trigger a restart handler.
 
 ## Ansible Galaxy
 
-Ansible Galaxy is a site where people can share finished ansible roles for different tbings.
+Ansible Galaxy is a site where people can share finished ansible roles for different things.
 
 ## Workshop 3
 
-We're going to use the nginx role from nginx to install a running nginx.
+We're going to use the nginx role from nginxinc to install a running nginx.
 
 The galaxy role we are going to install is https://galaxy.ansible.com/nginxinc/nginx
 
@@ -208,14 +213,15 @@ This should download the role and extract it into the roles directory.
 
 ### Task
 
-Now - we can use this in a playbook to install nginx on the web machines.
+Now - we can use this in a playbook to install nginx on the `web` machines.
 
 Create a playbook called nginx.yml:
 
-* Target the web servers
+* Target the `web` servers
 * Install the role nginxinc.nginx
+* Include web2 in the list of `web` servers in the inventory/hosts file
 
-Run the playbook - it should install nginx on both web1 and web2. Note that it skips things that are not relevant to CentOS.
+Run the playbook - it should install nginx on web1 and web2. Note that it skips things that are not relevant to CentOS.
 
 Check that it is running.
 
@@ -223,9 +229,10 @@ Check that it is running.
 curl -o - http://web1
 curl -o - http://web2
 curl -o - http://web3
+curl -o - http://web4
 ```
 
-The first two should return the default welcome to nginx page, the last one should return a connection error.
+The first two should return the default welcome to nginx page, the others should return a connection error.
 
 ### Task
 
@@ -261,6 +268,7 @@ First create the following directories:
 * `inventory/host_vars/web1`
 * `inventory/host_vars/web2`
 * `inventory/host_vars/web3`
+* `inventory/host_vars/web4`
 
 In `inventory/group_vars/web` create a file called nginx.yml with the contents:
 
@@ -276,7 +284,7 @@ And for each host_var directory - an nginx.yml file with the contents:
 host_hello_text: "Hello World from host x"
 ```
 
-Where x is the name of the host (web1, web2, web3)
+Where x is the name of the host (web1, web2, web3, web4)
 
 Now - change the hello.txt.j2 template to use these - something like this:
 
@@ -288,15 +296,19 @@ Web: {{ web_hello_text }}
 Host: {{ host_hello_text }}
 ```
 
-Run the playbook to update web1 and web2.
+Finally - add web3 to the `web` group in the inventory/hosts file
 
-You can use the same curl commands to check that the details were updated. Make sure that the host variable is correct per host.
+Run the playbook to update web1, web2 and web3.
+
+You can use the same curl command to check that the details were updated. Make sure that the host variable is correct per host.
 
 ## Putting it all together
 
 OK - we have now got a setup we want to use as our basis web machine.
 
-Let's create a playbook that does it all for us and then use that to also include web3.
+So far we have installed different things at different times on web1, web2 and web3 but we have done nothing on web4.
+
+Let's create a playbook that does it all for us and then use that to also include web4.
 
 ```
 - hosts: server
@@ -310,9 +322,14 @@ Let's create a playbook that does it all for us and then use that to also includ
     - role: nginx
 ```
 
-Then in the inventory - add web3 to the list of web hosts.
+Then in the inventory/hosts file - add web4 to the list of `web` hosts and to the list of `server` hosts.
 
-Finally run the playbook and see that web3 is now properly provsioned.
+Finally run the playbook and see that web4 is now properly provsioned:
+
+* motd is updated
+* haveged is installed and running - entropy is (likely) above 2000
+* nginx is installed and running
+* http://web4/hello.txt has the correct data
 
 ## Other stuff
 
@@ -353,3 +370,4 @@ There are some open source alternatives - for example:
 * [AWX](https://github.com/ansible/awx) which is the open source upstream for tower
 * [Semaphore](https://github.com/ansible-semaphore/semaphore)
 
+We'll take a quick look at AWX together (presentation/demo) to finish off.

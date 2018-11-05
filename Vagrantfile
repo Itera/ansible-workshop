@@ -28,4 +28,10 @@ Vagrant.configure("2") do |config|
         web3.vm.hostname = "web3"
         web3.vm.network :private_network, ip: '10.20.1.13'
     end
+        
+    config.vm.define "web4" do |web4|
+        web4.vm.box = "centos/7"
+        web4.vm.hostname = "web4"
+        web4.vm.network :private_network, ip: '10.20.1.14'
+    end
 end

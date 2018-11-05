@@ -22,3 +22,4 @@ grep -q -F 'ansible' /etc/hosts || echo "10.20.1.10 ansible ansible.localdomain"
 grep -q -F 'web1' /etc/hosts || echo "10.20.1.11 web1 web1.localdomain" >> /etc/hosts
 grep -q -F 'web2' /etc/hosts || echo "10.20.1.12 web2 web2.localdomain" >> /etc/hosts
 grep -q -F 'web3' /etc/hosts || echo "10.20.1.13 web3 web3.localdomain" >> /etc/hosts
+grep -q -F 'web4' /etc/hosts || echo "10.20.1.14 web4 web4.localdomain" >> /etc/hosts
