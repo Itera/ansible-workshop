@@ -14,7 +14,7 @@ You could choose to use the ansible code towards multiple instances in a cloud s
 
 ### Vagrant initialization
 
-First let's do the initial startup - this could take a few minutes - it is creating 4 machines.
+First let's do the initial startup - this could take a few minutes - it is creating 5 machines.
 
 ```
 vagrant up
@@ -49,6 +49,8 @@ cd ansible
 ```
 
 All steps after this assume that you are logged in to this workspace.
+
+*Note that the very first time ssh is used to connect to a machine it will ask if you want to add the host key to the list of known hosts (standard ssh behaviour). Before running the ansible tasks - ssh manually into web1, web2, web3 and web4 first*
 
 ## Starter project 1
 
@@ -102,8 +104,6 @@ You should see in the output that the file is "changed".
 If you run it again what happens?
 
 You should see in the output that the file is "ok".
-
-*Note that the very first time ssh is used to connect to a machine it will ask if you want to add the host key to the list of known hosts (standard ssh behaviour). You can either ssh manually into web1, web2 and web3 first - or just say yes three times when running the playbook the first time.*
 
 ## Workshop 1
 
