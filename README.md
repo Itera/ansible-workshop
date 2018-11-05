@@ -29,7 +29,7 @@ This does several things:
 * Installs ansible on the ansible machine
 * Copies the starter project onto the ansible machine
 
-This provides us with a simple setup where ansible is installed and can use ssh to connect to the machines that it want's to provision.
+This provides us with a simple setup where ansible is installed and can use ssh to connect to the machines that it wants to provision.
 
 Note that the ssh keys used here were generated for this workshop and should only be used in the virtual machines here - since they are publically available via this repository.
 
