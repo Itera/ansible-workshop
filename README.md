@@ -366,6 +366,18 @@ vault_password_file = vault-password.txt
 
 But this requires either a shared gpg key or that the committed encrypted password file is encrypted for everyone that needs it. This may not scale well.
 
+### Running as root
+
+For this workshop we kept things simple by allowing you to run everything by using ssh as the root user. This is often not the best practice. Ansible has support for allowing you to connect as a non-root user and to safely escalate priviliges where needed.
+
+* [Ansible "become" and privilege escalation](https://docs.ansible.com/ansible/2.7/user_guide/become.html)
+
+### Role dependencies
+
+There may well be some cases where you want to have dependencies on another role. These can be configured in the role/meta/main.yml files.
+
+* [Ansible role dependencies](https://docs.ansible.com/ansible/2.7/user_guide/playbooks_reuse_roles.html#role-dependencies)
+
 ### Ansible Tower
 
 [Ansible Tower](https://www.ansible.com/products/tower) is a commercial product from RedHat that helps in larger deployment scenarios.
