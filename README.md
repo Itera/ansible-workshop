@@ -42,15 +42,20 @@ The four machines that are set up are:
 
 We need to login to the ansible machine where we will run the exercises.
 
+To do so - we ssh into the ansible box (this happens as the vagrant user) then we switch to root.
+
+The very first time you do this - you should run the ssh-keyscan line (just the one time) - it sets up the ssh known_hosts file so that you don't get asked if you want to add the hosts later on.
+
+Finally we switch to the ansible directory where the basic setup for the workshop has been placed for you by the vagrant setup scripts.
+
 ```
 vagrant ssh ansible
 sudo su -
+ssh-keyscan -H web1 web2 web3 web4 10.20.1.11 10.20.1.12 10.20.1.13 10.20.1.14 > .ssh/known_hosts
 cd ansible
 ```
 
 All steps after this assume that you are logged in to this workspace.
-
-*Note that the very first time ssh is used to connect to a machine it will ask if you want to add the host key to the list of known hosts (standard ssh behaviour). Before running the ansible tasks - ssh manually into web1, web2, web3 and web4 first*
 
 ## Starter project 1
 
