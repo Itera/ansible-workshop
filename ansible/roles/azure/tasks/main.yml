@@ -1,0 +1,36 @@
+- name: azure | create resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group }}"
+    location: "{{ azure_region }}"
+
+- name: azure | create a storage account
+  azure_rm_storageaccount:
+    resource_group: "{{ resource_group }}"
+    name: "{{ storage_account }}"
+    type: Standard_RAGRS
+    location: "{{ azure_region }}"
+
+- name: azure | create virtual network
+  azure_rm_virtualnetwork:
+    name: "{{ virtual_network }}"
+    resource_group: "{{ resource_group }}"
+    address_prefixes_cidr:
+      - "10.2.0.0/16"
+      - "172.1.0.0/16"
+    state: present
+
+- name: azure | create subnet
+  azure_rm_subnet:
+    name: "{{ subnet }}"
+    virtual_network_name: "{{ virtual_network }}"
+    resource_group: "{{ resource_group }}"
+    address_prefix_cidr: "10.2.0.0/24"
+    state: present
+
+- name: azure | create VMs
+  include: vm.yml
+  with_items:
+    - web1
+    - web2
+    - web3
+    - web4

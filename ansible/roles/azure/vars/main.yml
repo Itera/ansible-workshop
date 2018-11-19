@@ -1,0 +1,5 @@
+azure_region: northeurope
+resource_group: ansible-demo
+storage_account: iterateststore
+virtual_network: vmnet01
+subnet: iterademosubnet

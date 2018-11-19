@@ -1,0 +1,42 @@
+- name: azure | create public IP for {{ item }}
+  azure_rm_publicipaddress:
+    resource_group: "{{ resource_group }}"
+    name: "{{ item }}-pip"
+    allocation_method: Static
+    domain_name: "{{ item }}-itera-no"
+    state: present
+  register: public_ip
+
+- name: azure | public IP for {{ item }}
+  debug:
+    msg: "{{ public_ip }}"
+
+- name: azure | create public nic for {{ item }}
+  azure_rm_networkinterface:
+    name: "{{ item }}-nic-pip"
+    resource_group: "{{ resource_group }}"
+    virtual_network_name: "{{ virtual_network }}"
+    subnet_name: "{{ subnet }}"
+    public_ip_address_name: "{{ item }}-pip"
+    state: present
+  register: network_interface_pip
+
+- name: azure | create vm for {{ item }}
+  azure_rm_virtualmachine:
+    resource_group: "{{ resource_group }}"
+    name: "{{ item }}"
+    location: "{{ azure_region }}"
+    storage_account: "{{ storage_account }}"
+    admin_username: chris
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: /home/chris/.ssh/authorized_keys
+        key_data: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDN44jBR73lX4jcRf48tftpe24Y3BBRig1/CQMPVoIq8mAjNof5CzFb3fv8FOBFAap1CIWm9IYJfGaRddjg+xxxGh45O59JtmNhmtObzfbMwSDx+W5XBpOgRmYW0eDV9pg06TbiqewKItpbXcyrd70Nk8JBC4PaXSYFbvNzcGh2dcgaAscXn2wHQiBWuHmD4F479xcNtEqqyBrcZeCdoOJUL2fa1B0TAU2coVH13WGUor4EIBfW342cfPL0XpA4HZHgjFaJKEuQa7+XX6Xd3UW2ewCOh8Jd2b0ySIQ9yWZv6VSbvom546BNRVrrP3upebKQifb1+3eOuzb3i5Gns8Ol"
+    image:
+      offer: CentOS
+      publisher: OpenLogic
+      sku: "7.5"
+      version: latest
+    vm_size: Standard_B1s
+    network_interfaces:
+      - "{{ item }}-nic-pip"
