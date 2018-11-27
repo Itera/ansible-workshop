@@ -301,7 +301,7 @@ Finally run the playbook and see that web4 is now properly provsioned:
 
 ## Configuration as code
 
-An ansible setup should be maintained in a change control system (git, svn, tfs etc) just as we do source code for projects. Changes should be made using similar processes (feature braches, code review etc) that are used as best practices in development.
+An ansible setup should be maintained in a change control system (git, svn, tfs etc) just as we do source code for projects. Changes should be made using similar processes (feature branches, code review etc) that are used as best practices in development.
 
 ## Ansible Vaults
 

@@ -120,7 +120,7 @@ ansible-playbook playbooks/motd.yml
 
 _Give it a go_
 
-^ Get everyone to try it the demonstrate
+^ Get everyone to try it then demonstrate
 
 ^ Show that first you get changed then you get OK
 
@@ -220,7 +220,7 @@ Time for some hands on - **Workshop 5**
 
 An ansible setup should be maintained in a change control system (git, svn, tfs etc) just as we do source code for projects.
 
-Changes should be made using similar processes (feature braches, code review etc) that are used as best practices in development.
+Changes should be made using similar processes (feature branches, code review etc) that are used as best practices in development.
 
 ---
 
